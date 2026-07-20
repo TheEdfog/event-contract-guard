@@ -1,0 +1,17 @@
+replicaCount: 2
+
+image:
+  repository: theedfog/event-contract-guard
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi

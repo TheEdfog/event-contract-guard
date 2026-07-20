@@ -1,0 +1,37 @@
+subject: retail.orders.v1
+version: 1
+owner: retail-data
+schema:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  type: object
+  additionalProperties: false
+  required:
+    - event_id
+    - event_time
+    - order_id
+    - store_id
+    - amount
+    - currency
+    - status
+  properties:
+    event_id:
+      type: string
+      format: uuid
+    event_time:
+      type: string
+      format: date-time
+    order_id:
+      type: string
+      format: uuid
+    store_id:
+      type: integer
+      minimum: 1
+    amount:
+      type: number
+      exclusiveMinimum: 0
+    currency:
+      type: string
+      pattern: ^[A-Z]{3}$
+    status:
+      type: string
+      enum: [created, paid, cancelled]

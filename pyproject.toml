@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "event-contract-guard"
+version = "0.1.0"
+description = "Validate Kafka events and block incompatible schema changes"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "jsonschema>=4.23,<5",
+  "prometheus-client>=0.21,<1",
+  "pydantic>=2.9,<3",
+  "pyyaml>=6,<7",
+  "uvicorn>=0.34,<1",
+]
+
+[project.optional-dependencies]
+kafka = ["confluent-kafka>=2.6,<3"]
+dev = ["httpx>=0.28,<1", "pytest>=8,<9", "ruff>=0.9,<1"]
+
+[project.scripts]
+contract-guard = "event_contract_guard.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/event_contract_guard"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
