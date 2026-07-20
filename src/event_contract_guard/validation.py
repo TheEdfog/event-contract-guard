@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 
 from event_contract_guard.contracts import Contract
 
@@ -13,7 +13,7 @@ class ValidationResult:
 
 
 def validate_event(contract: Contract, event: dict[str, Any]) -> ValidationResult:
-    validator = Draft202012Validator(contract.schema)
+    validator = Draft202012Validator(contract.schema, format_checker=FormatChecker())
     errors = tuple(
         f"{'/'.join(str(part) for part in error.path) or '$'}: {error.message}"
         for error in sorted(validator.iter_errors(event), key=lambda item: list(item.path))

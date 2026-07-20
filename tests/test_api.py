@@ -37,6 +37,25 @@ def test_invalid_event_returns_quarantine_envelope() -> None:
     assert len(body["quarantine"]["errors"]) >= 3
 
 
+def test_invalid_uuid_and_timestamp_formats_are_rejected() -> None:
+    client = TestClient(create_app(CONTRACTS))
+    response = client.post(
+        "/validate/retail.orders.v1",
+        json={
+            "event_id": "not-a-uuid",
+            "event_time": "yesterday",
+            "order_id": "also-not-a-uuid",
+            "store_id": 1,
+            "amount": 10,
+            "currency": "RUB",
+            "status": "paid",
+        },
+    )
+    errors = response.json()["quarantine"]["errors"]
+    assert any("uuid" in error for error in errors)
+    assert any("date-time" in error for error in errors)
+
+
 def test_incompatible_candidate_is_explained() -> None:
     client = TestClient(create_app(CONTRACTS))
     schema = {

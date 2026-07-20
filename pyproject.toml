@@ -6,10 +6,12 @@ build-backend = "hatchling.build"
 name = "event-contract-guard"
 version = "0.1.0"
 description = "Validate Kafka events and block incompatible schema changes"
+authors = [{ name = "Alim Narmamatov" }]
+license = { file = "LICENSE" }
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115,<1",
-  "jsonschema>=4.23,<5",
+  "jsonschema[format]>=4.23,<5",
   "prometheus-client>=0.21,<1",
   "pydantic>=2.9,<3",
   "pyyaml>=6,<7",

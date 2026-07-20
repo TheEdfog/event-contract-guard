@@ -22,8 +22,7 @@ def check_backward_compatible(
         issues.append(CompatibilityIssue(name, "existing field was removed"))
 
     for name in sorted(new_required - old_required):
-        if "default" not in new_properties.get(name, {}):
-            issues.append(CompatibilityIssue(name, "new required field has no default"))
+        issues.append(CompatibilityIssue(name, "new required field rejects existing events"))
 
     for name in sorted(old_properties.keys() & new_properties.keys()):
         old_field = old_properties[name]

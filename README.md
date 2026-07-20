@@ -60,6 +60,6 @@ docker compose config --quiet
 
 ## Deliberate limits
 
-The compatibility checker implements a small, explainable subset appropriate for this example. Production teams should use a mature Schema Registry or a standard such as the Data Contract Specification for the full compatibility matrix and governance workflow.
+The compatibility checker implements a small, top-level subset appropriate for this example. JSON Schema `default` values are annotations, so a new required field is treated as breaking even when it declares a default. Production teams should use a mature Schema Registry or a standard such as the Data Contract Specification for nested compatibility rules and governance workflows.
 
 The project was informed by the public Confluent Schema Registry patterns, the Data Contract Specification and OpenLineage's dataset ownership model. It is an independent implementation and does not copy source code from those projects.

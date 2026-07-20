@@ -12,7 +12,7 @@ def test_optional_field_is_backward_compatible() -> None:
     assert check_backward_compatible(BASE, candidate) == []
 
 
-def test_required_field_without_default_is_rejected() -> None:
+def test_new_required_field_is_rejected() -> None:
     candidate = {
         **BASE,
         "required": ["id", "store_id"],
@@ -20,8 +20,20 @@ def test_required_field_without_default_is_rejected() -> None:
     }
     issues = check_backward_compatible(BASE, candidate)
     assert [(issue.path, issue.message) for issue in issues] == [
-        ("store_id", "new required field has no default")
+        ("store_id", "new required field rejects existing events")
     ]
+
+
+def test_json_schema_default_does_not_make_required_field_compatible() -> None:
+    candidate = {
+        **BASE,
+        "required": ["id", "region"],
+        "properties": {
+            **BASE["properties"],
+            "region": {"type": "string", "default": "unknown"},
+        },
+    }
+    assert check_backward_compatible(BASE, candidate)[0].path == "region"
 
 
 def test_type_change_and_narrower_enum_are_rejected() -> None:
