@@ -1,21 +1,21 @@
-# Event Contract Guard
+# Контракты событий
 
-Event Contract Guard is a small service for teams that exchange JSON events through Kafka. It validates payloads at runtime, explains incompatible schema changes before release and routes rejected messages to a quarantine topic without committing the source offset early.
+Небольшой сервис для команд, обменивающихся JSON-событиями через Kafka. Он валидирует payload во время выполнения, объясняет несовместимые изменения схемы до релиза и отправляет отклонённые сообщения в quarantine, не подтверждая исходный offset раньше времени.
 
-It addresses a common ownership gap: producers know their application model, consumers know their analytical requirements, but neither side has an executable agreement about the event between them.
+Проект закрывает типичный разрыв ответственности: producer знает модель своего приложения, consumer — требования к аналитике, но между ними часто нет исполняемого соглашения о формате события.
 
-## What it does
+## Возможности
 
-- stores versioned JSON Schema contracts with an explicit owner;
-- validates events through an HTTP API, CLI or Kafka worker;
-- checks backward compatibility for removed fields, new required fields, type changes and narrowed enums;
-- returns a structured quarantine envelope instead of a generic exception;
-- exposes Prometheus counters for accepted and rejected events;
-- includes a non-root Docker image and a small Helm chart with probes and resource limits.
+- версионированные JSON Schema-контракты с указанным владельцем;
+- валидация через HTTP API, CLI или Kafka worker;
+- проверка backward compatibility при удалении полей, добавлении обязательных полей, изменении типов и сужении enum;
+- структурированный quarantine envelope вместо общей ошибки;
+- Prometheus counters для принятых и отклонённых событий;
+- non-root Docker image и небольшой Helm chart с probes и resource limits.
 
-The Kafka adapter disables automatic offset commits. It publishes the accepted or quarantined record first and commits the source offset only after the producer flush succeeds. The validation and routing logic is independent of Kafka, which keeps unit tests fast.
+Kafka adapter отключает автоматический commit offset. Сначала он публикует принятую или quarantined запись, ждёт успешного `flush` producer и только затем подтверждает исходное сообщение. Валидация и маршрутизация не зависят от Kafka, поэтому unit-тесты остаются быстрыми.
 
-## Local run
+## Локальный запуск
 
 ```bash
 python -m venv .venv
@@ -24,7 +24,7 @@ pip install -e ".[dev]"
 uvicorn event_contract_guard.api:app --reload
 ```
 
-Validate an event:
+Проверить событие:
 
 ```bash
 curl -X POST http://localhost:8000/validate/retail.orders.v1 \
@@ -32,24 +32,24 @@ curl -X POST http://localhost:8000/validate/retail.orders.v1 \
   --data @event.json
 ```
 
-Check a candidate schema before merging it:
+Проверить новую схему до merge:
 
 ```bash
 contract-guard retail.orders.v1 candidate-schema.json --schema
 ```
 
-The API also exposes `/compatibility/{subject}`, `/contracts`, `/health` and `/metrics`.
+Другие endpoints: `/compatibility/{subject}`, `/contracts`, `/health` и `/metrics`.
 
-## Deployment
+## Развёртывание
 
 ```bash
 docker compose up --build
 helm template contract-guard helm/event-contract-guard
 ```
 
-The included chart demonstrates the deployment boundary; it does not pretend to be a complete platform chart. A real environment should mount contracts from a versioned artifact or ConfigMap, configure authentication, add a PodDisruptionBudget and publish the image through the company registry.
+Helm chart показывает deployment boundary, но не выдаётся за универсальный platform chart. В рабочей среде контракты следует монтировать из версионированного артефакта или ConfigMap, включить аутентификацию, добавить PodDisruptionBudget и публиковать образ через корпоративный registry.
 
-## Tests
+## Проверки
 
 ```bash
 pip install -e ".[dev]"
@@ -58,8 +58,8 @@ pytest -q
 docker compose config --quiet
 ```
 
-## Deliberate limits
+## Ограничения
 
-The compatibility checker implements a small, top-level subset appropriate for this example. JSON Schema `default` values are annotations, so a new required field is treated as breaking even when it declares a default. Production teams should use a mature Schema Registry or a standard such as the Data Contract Specification for nested compatibility rules and governance workflows.
+Compatibility checker обрабатывает небольшой и понятный набор правил верхнего уровня. В JSON Schema значение `default` является аннотацией, поэтому новое обязательное поле считается breaking change даже при наличии default. Для вложенных правил и полноценного governance workflow в production нужен зрелый Schema Registry или стандарт Data Contract Specification.
 
-The project was informed by the public Confluent Schema Registry patterns, the Data Contract Specification and OpenLineage's dataset ownership model. It is an independent implementation and does not copy source code from those projects.
+При проектировании использовались публичные материалы Confluent Schema Registry, Data Contract Specification и модель владения datasets из OpenLineage. Это самостоятельная реализация без копирования исходного кода.
