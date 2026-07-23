@@ -14,7 +14,7 @@
 - non-root Docker image и небольшой Helm chart с probes и resource limits.
 
 ```mermaid
-flowchart LR
+flowchart TD
     producer["Producer"] --> input["Входной Kafka topic"]
     input --> worker["Contract Guard worker"]
     contracts["Версионированные<br/>JSON Schema-контракты"] --> worker
