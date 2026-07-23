@@ -13,25 +13,7 @@
 - Prometheus counters для принятых и отклонённых событий;
 - non-root Docker image и небольшой Helm chart с probes и resource limits.
 
-```mermaid
-sequenceDiagram
-    participant Kafka as Входной Kafka topic
-    participant Worker as Contract Guard
-    participant Schemas as JSON Schema
-    participant Result as Output / quarantine
-
-    Kafka->>Worker: Событие и offset
-    Worker->>Schemas: Найти контракт и проверить payload
-    Schemas-->>Worker: Результат валидации
-    alt Событие валидно
-        Worker->>Result: Опубликовать в output topic
-    else Ошибка валидации
-        Worker->>Result: Payload и причина в quarantine
-    end
-    Result-->>Worker: Публикация подтверждена
-    Worker->>Kafka: Commit исходного offset
-    Worker->>Worker: Обновить Prometheus metrics
-```
+![Поток валидации события](docs/architecture.svg)
 
 Kafka adapter отключает автоматический commit offset. Сначала он публикует принятую или quarantined запись, ждёт успешного `flush` producer и только затем подтверждает исходное сообщение. Валидация и маршрутизация не зависят от Kafka, поэтому unit-тесты остаются быстрыми.
 

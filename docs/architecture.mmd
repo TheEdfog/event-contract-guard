@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant Kafka as Входной Kafka topic
+    participant Worker as Contract Guard
+    participant Schemas as JSON Schema
+    participant Result as Output / quarantine
+
+    Kafka->>Worker: Событие и offset
+    Worker->>Schemas: Найти контракт и проверить payload
+    Schemas-->>Worker: Результат валидации
+    alt Событие валидно
+        Worker->>Result: Опубликовать в output topic
+    else Ошибка валидации
+        Worker->>Result: Payload и причина в quarantine
+    end
+    Result-->>Worker: Публикация подтверждена
+    Worker->>Kafka: Commit исходного offset
+    Worker->>Worker: Обновить Prometheus metrics
