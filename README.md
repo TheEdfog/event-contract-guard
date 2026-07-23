@@ -13,6 +13,18 @@
 - Prometheus counters для принятых и отклонённых событий;
 - non-root Docker image и небольшой Helm chart с probes и resource limits.
 
+```mermaid
+flowchart LR
+    producer["Producer"] --> input["Входной Kafka topic"]
+    input --> worker["Contract Guard worker"]
+    contracts["Версионированные<br/>JSON Schema-контракты"] --> worker
+    worker -->|"валидно"| output["Выходной topic"]
+    worker -->|"ошибка"| quarantine["Quarantine topic<br/>payload и причина"]
+    worker --> metrics["Prometheus metrics"]
+    output --> commit["Commit исходного offset"]
+    quarantine --> commit
+```
+
 Kafka adapter отключает автоматический commit offset. Сначала он публикует принятую или quarantined запись, ждёт успешного `flush` producer и только затем подтверждает исходное сообщение. Валидация и маршрутизация не зависят от Kafka, поэтому unit-тесты остаются быстрыми.
 
 ## Локальный запуск
